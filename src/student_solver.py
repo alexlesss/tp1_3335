@@ -80,7 +80,22 @@ def bfs(adj: Adjacency, start: int, goal: int) -> SearchResult:
     expanded: list[int] = []         # Liste pour stocker les noeuds développés dans leur ordre d'exploration.       
     n_explored = 0                   # Compteur pour compter le nombre de noeuds développés. Il doit être incrémenté à chaque fois qu'un noeud est développé.  
 
-    # TODO : Compléter le code ici
+    frontier = deque([start])
+    discovered = {start}
+
+    while frontier:
+        current = frontier.popleft()
+        expanded.append(current)
+        n_explored += 1
+        if current == goal:
+            chemin = reconstruct_path(came_from, start, goal)
+            return SearchResult(chemin, path_cost(adj, chemin), expanded, n_explored)
+
+        for neighbor, _ in adj[current]:
+            if neighbor not in discovered:
+                discovered.add(neighbor)
+                came_from[neighbor] = current
+                frontier.append(neighbor)
 
     return SearchResult(None, math.inf, expanded, n_explored) # N'effacez pas cette ligne
 
@@ -98,7 +113,22 @@ def dfs(adj: Adjacency, start: int, goal: int) -> SearchResult:
     expanded: list[int] = []
     n_explored = 0
 
-    # TODO : Compléter le code ici
+    frontier = [start]
+    discovered = {start}
+
+    while frontier:
+        current = frontier.pop()
+        expanded.append(current)
+        n_explored += 1
+        if current == goal:
+            chemin = reconstruct_path(came_from, start, goal)
+            return SearchResult(chemin, path_cost(adj, chemin), expanded, n_explored)
+
+        for neighbor, _ in reversed(adj[current]):
+            if neighbor not in discovered:
+                discovered.add(neighbor)
+                came_from[neighbor] = current
+                frontier.append(neighbor)
 
     return SearchResult(None, math.inf, expanded, n_explored) # N'effacez pas cette ligne
 
@@ -140,8 +170,9 @@ def heuristic_euclidean(node: int, goal: int, coords_m: CoordsM) -> float:
 
     Pour caluler la distance euclidienne entre deux points (x1, y1) et (x2, y2), vous pouvez utiliser la fonction math.hypoth
     """
-    # TODO : remplacez le return par votre implémetation.
-    return 0.0
+    x1, y1 = coords_m[node]
+    x2, y2 = coords_m[goal]
+    return math.hypot(x2 - x1, y2 - y1)
 
 # ============================================================================
 # TODO 5/6 : Heuristique manhattan
@@ -154,8 +185,9 @@ def heuristic_manhattan(node: int, goal: int, coords_m: CoordsM) -> float:
 
     Consigne à respecter: Utiliser la fonction abs() 
     """
-    # TODO : remplacez le return par votre implémetation.
-    return 0.0
+    x1, y1 = coords_m[node]
+    x2, y2 = coords_m[goal]
+    return abs(x1 - x2) + abs(y1 - y2)
 
 
 # ============================================================================
