@@ -4,10 +4,7 @@
 ============================================================================
 
 Prénom, Nom et Matricule:
-
-
-
-
+Jérémy Faubert, 20274993 - Alexis Lessnick, 20297698
 """
 
 from __future__ import annotations
@@ -67,7 +64,7 @@ def bfs(adj: Adjacency, start: int, goal: int) -> SearchResult:
     Consignes à respecter:
     - Ne changer pas la signature de la fonction.
     - Vous devez utiliser les variables initialisées *came_from*, *expanded* et *n_explored* dont leur explication est détaillé ci-bas.
-      Elles servent au fonctionnement de l'algorithme, à la visualisation et à la correction donc il faut les populer.
+    - Elles servent au fonctionnement de l'algorithme, à la visualisation et à la correction donc il faut les populer.
     - Vous pouvez (devez) ajouter d'autres variables locales que vous jugez nécessaires.
     - La valeur de retour doit être:
             chemin = reconstruct_path(came_from, start, goal) 
@@ -148,7 +145,32 @@ def ucs(adj: Adjacency, start: int, goal: int) -> SearchResult:
     expanded: list[int] = []
     n_explored = 0
 
-    # TODO : Compléter le code ici
+    frontier = [(0, start)] 
+    meilleur_cout = {start: 0}
+    closed = set()
+
+    while frontier:
+        cout_actuel, noeud_actuel = heapq.heappop(frontier)
+
+        if noeud_actuel in closed:
+            continue
+
+        expanded.append(noeud_actuel)
+        closed.add(noeud_actuel)
+        n_explored += 1
+
+        if noeud_actuel == goal:
+            chemin = reconstruct_path(came_from, start, goal)
+            return SearchResult(chemin, path_cost(adj, chemin), expanded, n_explored)
+        
+        for voisin, poids in adj[noeud_actuel]:
+            if voisin in closed:
+                continue
+            nouveau_cout = cout_actuel + poids
+            if voisin not in meilleur_cout or nouveau_cout < meilleur_cout[voisin]:
+                meilleur_cout[voisin] = nouveau_cout
+                came_from[voisin] = noeud_actuel
+                heapq.heappush(frontier, (nouveau_cout, voisin))    
 
     return SearchResult(None, math.inf, expanded, n_explored) # N'effacez pas cette ligne
 
@@ -207,7 +229,7 @@ def a_star(adj: Adjacency, start: int, goal: int, heuristic) -> SearchResult:
     - le coût renvoyé dans SerachResult doit être g[goal], pas f[goal], la somme du coût réel et de l'heurisitque, on veut le coût réel du chemin.
     - N'oubliez pas de gérer les doublons dans l'exploration d'un graphe.
     - Un noeud déjà développé (fermé) ne doit jamais être rouvert ni mis à jour: ignorez-le lorsqu'il apparaît
-      comme voisin. Ainsi, le chemin renvoyé et son coût g[goal] concordent toujours
+    comme voisin. Ainsi, le chemin renvoyé et son coût g[goal] concordent toujours
     - Vous pouvez utiliser *heapq* pour gérer la file de priorité.
 
     """
@@ -215,6 +237,33 @@ def a_star(adj: Adjacency, start: int, goal: int, heuristic) -> SearchResult:
     expanded: list[int] = []
     n_explored = 0
 
-    # TODO : Compléter le code ici
+    h = heuristic 
+    frontier = [(h(start), start)] 
+    meilleur_cout = {start: 0}
+    closed = set()
+
+    while frontier:
+        cout_actuel, noeud_actuel = heapq.heappop(frontier)
+
+        if noeud_actuel in closed:
+            continue
+
+        expanded.append(noeud_actuel)
+        closed.add(noeud_actuel)
+        n_explored += 1
+
+        if noeud_actuel == goal:
+            chemin = reconstruct_path(came_from, start, goal)
+            return SearchResult(chemin, path_cost(adj, chemin), expanded, n_explored)
+        
+        for voisin, poids in adj[noeud_actuel]:
+            if voisin in closed:
+                continue
+            nouveau_cout = meilleur_cout[noeud_actuel] + poids
+            if voisin not in meilleur_cout or nouveau_cout < meilleur_cout[voisin]:
+                meilleur_cout[voisin] = nouveau_cout
+                came_from[voisin] = noeud_actuel
+                f_voisin = nouveau_cout + h(voisin)
+                heapq.heappush(frontier, (f_voisin, voisin))
 
     return SearchResult(None, math.inf, expanded, n_explored) # N'effacez pas cette ligne
